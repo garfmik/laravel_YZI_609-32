@@ -11,9 +11,11 @@ class ReviewControllerApi extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($id)
     {
-        return response(Review::all());
+        $restaurant = Restaurant::find($id);
+
+        return response($restaurant->reviews);
     }
 
     /**

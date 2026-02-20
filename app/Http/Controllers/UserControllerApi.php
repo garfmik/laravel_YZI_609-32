@@ -12,7 +12,7 @@ class UserControllerApi extends Controller
      */
     public function index()
     {
-        return response(User::all());
+
     }
 
     /**
