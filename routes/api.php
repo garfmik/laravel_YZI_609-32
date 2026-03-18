@@ -5,6 +5,7 @@ use App\Http\Controllers\RestaurantControllerApi;
 use App\Http\Controllers\ReviewControllerApi;
 use App\Http\Controllers\UserControllerApi;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 Route::post('/login', [AuthController::class, 'login']);
 
