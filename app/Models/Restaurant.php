@@ -39,7 +39,7 @@ class Restaurant extends Model
     // Избранные
     public function favorites()
     {
-        return $this->hasMany(Favorite::class);
+        return $this->hasMany(Favourite::class);
     }
 
     // События

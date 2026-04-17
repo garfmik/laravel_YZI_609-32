@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Favorite extends Model
+class Favourite extends Model
 {
     use HasFactory;
-
+    protected $table = 'favourites';
     protected $fillable = ['user_id', 'restaurant_id'];
 
     public function user()
