@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Restaurant;
 use App\Models\Review;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ReviewControllerApi extends Controller
 {
@@ -15,7 +17,9 @@ class ReviewControllerApi extends Controller
     {
         $restaurant = Restaurant::find($id);
 
-        return response($restaurant->reviews);
+        return response(
+            $restaurant->reviews()->with('user')->get()
+        );
     }
 
     /**
@@ -23,9 +27,8 @@ class ReviewControllerApi extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
 
+    }
     /**
      * Display the specified resource.
      */

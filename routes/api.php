@@ -11,9 +11,7 @@ use Illuminate\Http\Request;
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/restaurants', [RestaurantControllerApi::class, 'index']);
-
 Route::get('/restaurants/{id}', [RestaurantControllerApi::class, 'show']);
-
 
 Route::get('/restaurants_total', [RestaurantControllerApi::class, 'total']);
 
@@ -26,9 +24,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 });
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::post('/restaurants', [RestaurantControllerApi::class, 'store']);
+
     Route::get('/restaurants/{id}/reviews', [ReviewControllerApi::class, 'index']);
     Route::get('/user',function (Request $request){
         return $request->user();
     });
     Route::get('/logout', [AuthController::class, 'logout']);
+
 });
