@@ -25,11 +25,14 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/restaurants', [RestaurantControllerApi::class, 'store']);
+    Route::delete('/restaurants/{id}', [RestaurantControllerApi::class, 'destroy']);
+    Route::post('/restaurants/{id}', [RestaurantControllerApi::class, 'update']);
 
     Route::get('/restaurants/{id}/reviews', [ReviewControllerApi::class, 'index']);
     Route::get('/user',function (Request $request){
         return $request->user();
     });
     Route::get('/logout', [AuthController::class, 'logout']);
+
 
 });

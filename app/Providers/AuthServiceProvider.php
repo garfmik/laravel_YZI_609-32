@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Models\User;
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
@@ -18,8 +17,16 @@ class AuthServiceProvider extends ServiceProvider
             return true;
         });
 
+        Gate::define('update-restaurant', function (User $user) {
+            return $user->is_admin;
+        });
+
         Gate::define('create-restaurant', function (User $user) {
             return true;
+        });
+
+        Gate::define('delete-restaurant', function (User $user) {
+            dd($user);
         });
 
     }

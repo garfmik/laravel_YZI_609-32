@@ -16,11 +16,13 @@ class RestaurantControllerApi extends Controller
     {
         return response(Restaurant::limit($request->perpage ?? 5)
         ->offset(($request->perpage ?? 5) * ($request->page ?? 0))
+        ->where('name', 'LIKE', '%' . $request->search . "%")
         ->get());
     }
 
-    public function total(){
-        return response(Restaurant::all()->count());
+    public function total(Request $request){
+        return response(Restaurant::where('name', 'LIKE', '%' . $request->search . "%")
+            ->count());
     }
     /**
      * Store a newly created resource in storage.
@@ -76,7 +78,48 @@ class RestaurantControllerApi extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+//        if (!Gate::allows('update-restaurant')) {
+//            return response()->json([
+//                'code' => 1,
+//                'message' => 'У вас нет прав на редактирование ресторана',
+//            ]);
+//        }
+        $validated = $request->validate([
+            'name'    => 'required|max:255|unique:restaurants,name,' . $id,
+            'image'   => 'nullable|file|image|max:2048',
+        ]);
+        try {
+            $restaurant = Restaurant::findOrFail($id);
+            $restaurant->name = $validated['name'];
+            if ($request->hasFile('image')) {
+                try{
+                    if ($restaurant->picture_url) {
+                        $baseUrl = Storage::disk('s3')->getClient()->getEndpoint();
+                        $oldPath = str_replace($baseUrl, '', $restaurant->picture_url);
+                        if (Storage::disk('s3')->exists($oldPath)) {
+                            Storage::disk('s3')->delete($oldPath);
+                        }
+                    }
+                    $file = $request->file('image');
+                    $fileName = rand(1, 100000) . '_' . $file->getClientOriginalName();
+                    $path = Storage::disk('s3')->putFileAs('restaurant_pictures', $file, $fileName);
+                    $restaurant->picture_url = Storage::disk('s3')->url($path);
+                } catch (\Exception $e){
+                    return response()->json(['message' => 'Error uploading file to S3: ',
+                        'error' => ['code' => $e->getCode(), 'message' => $e->getMessage()]], 500);
+                }
+            }
+            $restaurant->save();
+            return response()->json([
+                'code' => 0,
+                'message' => 'Ресторан успешно обновлен',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'code' => 2,
+                'message' => 'Ошибка при обновлении: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -84,6 +127,20 @@ class RestaurantControllerApi extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        if (!Gate::allows('delete-restaurant')) {
+            return response()->json([
+                'code' => 1,
+                'message' => 'У вас нет прав на удаление ресторана',
+            ], 401);
+        }
+        $restaurant = Restaurant::find($id);
+        if ($restaurant->favorites()->count()) {
+            return response()->json(['code' => 1, 'error' => 'Нельзя удалять непустой ресторан']);
+        }
+        $deleted = Restaurant::destroy($id);
+        if ($deleted === 0 ) {
+            return response()->json(['code'=> 1, 'error' => 'Ресторан не найден']);
+        }
+        return response()->json(['code' => 0, 'message' => 'Ресторан успешно удален']);
     }
 }
